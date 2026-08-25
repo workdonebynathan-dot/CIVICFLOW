@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicFlow Pro | Smart Governance Portal</title>
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0b1e4c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#0b1e4c">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    </script>
+
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+
+        /* --- HEADER (Professional Deep Blue) --- */
+        .gov-header {
+            background: #0b1e4c;
+            padding: 15px 0;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        /* --- TRACKING BAR --- */
+        .track-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid #0b1e4c;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .track-input {
+            border-radius: 30px;
+            border: 1px solid #ced4da;
+            padding-left: 20px;
+        }
+        .track-btn {
+            border-radius: 30px;
+            padding-left: 25px;
+            padding-right: 25px;
+            font-weight: bold;
+            background-color: #0b1e4c;
+            border-color: #0b1e4c;
+        }
+        .track-btn:hover { background-color: #0d2a6b; }
+
+        /* --- NEW: PROFESSIONAL ACTION CARDS --- */
+        .action-card {
+            background: white;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(11, 30, 76, 0.1);
+        }
+
+        .icon-box {
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            transition: all 0.3s ease;
+        }
+
+        /* Orange Theme (Grievance) */
+        .card-orange { border-bottom: 4px solid #ff9933; }
+        .card-orange .icon-box { background: #fff3e0; color: #ff9933; }
+        .card-orange:hover .icon-box { background: #ff9933; color: white; }
+        .card-orange h3 { color: #333; }
+
+        /* Blue Theme (Permit) */
+        .card-blue { border-bottom: 4px solid #0b1e4c; }
+        .card-blue .icon-box { background: #e3f2fd; color: #0b1e4c; }
+        .card-blue:hover .icon-box { background: #0b1e4c; color: white; }
+        .card-blue h3 { color: #333; }
+
+        /* --- STATS CARDS --- */
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            height: 100%;
+            transition: transform 0.3s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-number { font-size: 3rem; font-weight: 800; margin-bottom: 5px; line-height: 1; }
+        .num-orange { color: #ff9933; }
+        .num-green { color: #198754; }
+        .stat-label { font-size: 0.85rem; font-weight: 700; color: #0b1e4c; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- TABLE STYLE --- */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-top: 30px;
+        }
+        .table thead th {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            border: none;
+            padding: 15px;
+        }
+        .table tbody td {
+            vertical-align: middle;
+            padding: 15px;
+            color: #333;
+        }
+        
+        /* TABS FOR HISTORY */
+        .nav-pills .nav-link { color: #555; font-weight: 600; border-radius: 20px; padding: 8px 25px; margin-right: 10px;}
+        .nav-pills .nav-link.active { background-color: #0b1e4c; color: white; }
+
+        /* --- STATUS BADGES --- */
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .bg-pending { background-color: #fff3cd; color: #856404; }
+        .bg-progress { background-color: #cff4fc; color: #055160; }
+        .bg-resolved { background-color: #d1e7dd; color: #0f5132; }
+        .bg-rejected { background-color: #f8d7da; color: #842029; }
+
+        /* --- ACTION BUTTONS --- */
+        .btn-action {
+            width: 35px; height: 35px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            border: none; transition: all 0.2s;
+        }
+        .btn-print { background-color: #f0f0f0; color: #555; }
+        .btn-print:hover { background-color: #555; color: white; }
+
+        footer { margin-top: 50px; text-align: center; color: #999; font-size: 0.85rem; padding-bottom: 20px; }
+
+        /* =========================================
+           🤖 MODERN CHATBOT STYLES
+           ========================================= */
+        .chat-btn {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 65px; height: 65px;
+            background: linear-gradient(135deg, #0b1e4c, #2a5298);
+            color: white; border-radius: 50%; border: none;
+            box-shadow: 0 10px 25px rgba(11, 30, 76, 0.4);
+            cursor: pointer; z-index: 1000;
+            transition: transform 0.3s ease;
+            display: flex; align-items: center; justify-content: center; font-size: 28px;
+        }
+        .chat-btn:hover { transform: scale(1.1) rotate(5deg); }
+
+        .chat-box {
+            position: fixed; bottom: 100px; right: 30px;
+            width: 350px; height: 480px;
+            background: #ffffff; border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            z-index: 1000; display: none;
+            flex-direction: column; overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .chat-header {
+            background: linear-gradient(135deg, #0b1e4c, #2a5298);
+            padding: 15px 20px; color: white;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .chat-header h5 { margin: 0; font-size: 16px; font-weight: 600; }
+        .chat-header span { font-size: 12px; opacity: 0.8; }
+
+        .chat-body { flex: 1; padding: 15px; background: #f8f9fa; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+
+        .message { display: flex; align-items: flex-end; max-width: 85%; font-size: 14px; line-height: 1.5; position: relative; }
+        
+        .bot-msg { align-self: flex-start; }
+        .bot-bubble {
+            background: white; color: #333; padding: 12px 16px;
+            border-radius: 15px 15px 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee;
+        }
+        .bot-icon {
+            width: 30px; height: 30px; background: #ff9933; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 14px; margin-right: 8px; flex-shrink: 0;
+        }
+
+        .user-msg { align-self: flex-end; flex-direction: row-reverse; }
+        .user-bubble {
+            background: #0b1e4c; color: white; padding: 12px 16px;
+            border-radius: 15px 15px 0 15px;
+            box-shadow: 0 4px 10px rgba(11, 30, 76, 0.2);
+        }
+
+        .chat-footer { padding: 15px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .chat-input { flex: 1; border: none; background: #f1f3f5; padding: 10px 15px; border-radius: 25px; outline: none; font-size: 14px; }
+        .send-btn {
+            background: #0b1e4c; color: white; width: 40px; height: 40px;
+            border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .send-btn:hover { background: #ff9933; }
+    </style>
+</head>
+<body>
+
+    <header class="gov-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-landmark fs-2 me-3 text-warning"></i>
+                <div>
+                    <div class="fw-bold fs-5">{{ citizen_name }}</div>
+                    <div class="small opacity-75">Citizen Dashboard</div>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-outline-light btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="fas fa-user-edit me-1"></i> Edit Profile
+                </button>
+                <a href="{{ url_for('logout') }}" class="btn btn-warning btn-sm fw-bold text-dark">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container my-5">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="track-card">
+            <div>
+                <h5 class="fw-bold mb-1 text-dark"><i class="fas fa-search-location text-primary me-2"></i> Track Complaint</h5>
+                <small class="text-muted">Enter your Tracking ID to see live status updates.</small>
+            </div>
+            <form action="{{ url_for('track_complaint') }}" method="POST" class="d-flex" style="flex-grow: 1; max-width: 500px; margin-left: 20px;">
+                <input type="text" name="tracking" class="form-control track-input me-2" placeholder="e.g. A1B2C3D4" required>
+                <button type="submit" class="btn btn-primary track-btn">Track</button>
+            </form>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <a href="{{ url_for('submit') }}" class="action-card card-orange">
+                    <div class="icon-box"><i class="fas fa-bullhorn"></i></div>
+                    <h3 class="fw-bold mb-1">Report Grievance</h3>
+                    <p class="text-muted mb-0 small">File a complaint about roads, water, or garbage.</p>
+                </a>
+            </div>
+            <div class="col-md-6 mb-3">
+                <a href="{{ url_for('permission_portal') }}" class="action-card card-blue">
+                    <div class="icon-box"><i class="fas fa-file-contract"></i></div>
+                    <h3 class="fw-bold mb-1">Apply for Permit</h3>
+                    <p class="text-muted mb-0 small">Event permissions, loudspeakers, or construction.</p>
+                </a>
+            </div>
+        </div>
+        <div class="row mb-4 align-items-center">
+            <div class="col">
+                <h4 class="fw-bold text-secondary mb-0">Overview</h4>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('analytics') }}" class="btn btn-dark shadow-sm">
+                    <i class="fas fa-chart-pie me-2"></i> View City Insights
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <i class="fas fa-clipboard-list fa-2x text-muted mb-3"></i>
+                    <div class="stat-number num-orange">{{ stats.total }}</div>
+                    <div class="stat-label">Total Filed</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <i class="fas fa-trophy fa-2x text-muted mb-3"></i>
+                    <div class="stat-number num-green">{{ stats.resolved }}</div>
+                    <div class="stat-label">Resolved</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card" style="background: linear-gradient(135deg, #0b1e4c, #1a4a9c); color: white;">
+                    <i class="fas fa-clock fa-2x mb-3 text-warning"></i>
+                    <div class="stat-number text-white">{{ stats.registered }}</div>
+                    <div class="stat-label text-white-50">Pending Action</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0 text-dark">My Activities</h5>
+                <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="pills-complaint-tab" data-bs-toggle="pill" data-bs-target="#pills-complaint" type="button">Grievances</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="pills-permit-tab" data-bs-toggle="pill" data-bs-target="#pills-permit" type="button">Permits</button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade show active" id="pills-complaint">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Subject</th>
+                                    <th>Department</th>
+                                    <th>Status</th>
+                                    <th>Current Desk</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if complaints %}
+                                    {% for c in complaints %}
+                                    <tr>
+                                        <td class="fw-bold text-muted">#{{ c.get('tracking_id') }}</td>
+                                        <td>
+                                            <div class="fw-bold text-dark">
+                                                {{ (c.get('complaint') or c.get('description') or 'No Subject')[:30] }}...
+                                            </div>
+                                            <div class="small text-muted">
+                                                <i class="far fa-clock me-1"></i> {{ c.get('created_at') }}
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border">{{ c.get('department') }}</span></td>
+                                        <td>
+                                            {% set status = c.get('status') %}
+                                            {% if status == 'Pending' or status == 'Registered' %}
+                                                <span class="badge bg-warning text-dark">Registered</span>
+                                            {% elif status == 'Resolved' %}
+                                                <span class="badge bg-success">Resolved</span>
+                                            {% elif status == 'Rejected' %}
+                                                <span class="badge bg-danger">Rejected</span>
+                                            {% else %}
+                                                <span class="badge bg-info text-white">In Progress</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if c.get('status') == 'Resolved' %}
+                                                <i class="fas fa-check-circle text-success"></i> Case Closed
+                                            {% else %}
+                                                <small class="fw-bold text-primary">
+                                                    <i class="fas fa-user-tie me-1"></i> {{ c.get('current_desk') or 'Section Clerk' }}
+                                                </small>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <a href="{{ url_for('download_receipt', tracking_id=c.get('tracking_id')) }}" 
+                                                target="_blank" class="btn btn-sm btn-dark" title="Print Receipt">
+                                                    <i class="fas fa-file-download"></i>
+                                                </a>
+
+                                                {% if c.get('status') == 'Resolved' %}
+                                                    <button class="btn btn-sm btn-warning text-white" data-bs-toggle="modal" 
+                                                            data-bs-target="#rateModal{{ c.id }}" title="Rate Service">
+                                                        <i class="fas fa-star"></i> Rate
+                                                    </button>
+                                                {% elif c.get('status') == 'Rejected' %}
+                                                    <form action="{{ url_for('appeal_complaint', id=c.id) }}" method="POST" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Appeal</button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <div class="modal fade" id="rateModal{{ c.id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-warning">
+                                                    <h5 class="modal-title text-white">Rate Resolution: #{{ c.tracking_id }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ url_for('rate_service', id=c.id) }}" method="POST">
+                                                    <div class="modal-body text-center">
+                                                        <p class="fw-bold">Was your issue fixed to your satisfaction? [cite: 13]</p>
+                                                        <div class="mb-3">
+                                                            <select name="rating" class="form-select text-center" style="font-size: 1.2rem;" required>
+                                                                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                                                                <option value="4">⭐⭐⭐⭐ Good</option>
+                                                                <option value="3">⭐⭐⭐ Average</option>
+                                                                <option value="2">⭐⭐ Poor</option>
+                                                                <option value="1">⭐ Very Bad</option>
+                                                            </select>
+                                                        </div>
+                                                        <textarea name="comment" class="form-control" rows="3" placeholder="Additional feedback for predictive maintenance..." required></textarea>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-success w-100">Submit Performance Feedback</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <p class="text-muted fw-bold">No grievances found[cite: 19].</p>
+                                            <a href="{{ url_for('submit') }}" class="btn btn-sm btn-primary rounded-pill px-3">File First Complaint</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="pills-permit">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Applied Date</th>
+                                    <th>Type</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th class="text-end">View</th>
+                                </tr>
+                            </thead>
+                      <tbody>
+                            {% if permits %} 
+                                {% for p in permits %} 
+                                <tr>
+                                    <td>{{ p.created_at }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ p.type }}</span></td>
+                                    <td>{{ p.start_date }} to {{ p.end_date }}</td>
+                                    <td>
+                                        {% if p.status == 'Approved' %} 
+                                            <span class="badge bg-success">Granted</span>
+                                        {% elif p.status == 'Rejected' %} 
+                                            <span class="badge bg-danger">Denied</span>
+                                        {% else %} 
+                                            <span class="badge bg-warning text-dark">Processing</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('permit_receipt', tracking_id=p.tracking_id) }}" 
+                                        class="btn btn-sm btn-outline-primary rounded-pill shadow-sm">
+                                        <i class="fas fa-file-invoice me-1"></i>Receipt
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted">No permit applications found.</td></tr>
+                            {% endif %}
+                      </tbody>     
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>Designed by TOTEX | Official Municipality Portal</footer>
+
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i> Update Profile</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('edit_profile') }}" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Full Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ user_data['name'] if user_data else session.get('officer_name', '') }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email Address</label>
+                            <input type="email" name="email" class="form-control" value="{{ user_data['email'] if user_data else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-danger">Change Password</label>
+                            <input type="password" name="password" class="form-control border-danger" placeholder="Leave blank to keep current">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control" value="{{ user_data['phone'] if user_data else '' }}" placeholder="+91...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Residential Address</label>
+                            <textarea name="address" class="form-control" rows="3">{{ user_data['address'] if user_data else '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <button class="chat-btn" onclick="toggleChat()">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <div class="chat-box" id="chat-box">
+        <div class="chat-header">
+            <div class="d-flex align-items-center">
+                <div style="width: 10px; height: 10px; background: #00ff00; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 5px #00ff00;"></div>
+                <div>
+                    <h5>CivicBot Support</h5>
+                    <span>Online & Ready to Help</span>
+                </div>
+            </div>
+            <button onclick="toggleChat()" class="btn btn-sm text-white"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="chat-body" id="chat-history">
+            <div class="message bot-msg">
+                <div class="bot-icon"><i class="fas fa-robot"></i></div>
+                <div class="bot-bubble">
+                    👋 Hello! I am CivicBot. <br>
+                    Try asking: <b>"Contact PWD"</b> or <b>"How to file?"</b>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-footer">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Type your question..." onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const box = document.getElementById('chat-box');
+            if (box.style.display === 'flex') {
+                box.style.display = 'none';
+            } else {
+                box.style.display = 'flex';
+                document.getElementById('chat-input').focus();
+            }
+        }
+
+        function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const history = document.getElementById('chat-history');
+            const msg = input.value.trim();
+            
+            if (!msg) return;
+
+            history.innerHTML += `
+                <div class="message user-msg">
+                    <div class="user-bubble">${msg}</div>
+                </div>`;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            const loadingId = 'loading-' + Date.now();
+            history.innerHTML += `
+                <div class="message bot-msg" id="${loadingId}">
+                    <div class="bot-icon"><i class="fas fa-robot"></i></div>
+                    <div class="bot-bubble"><i class="fas fa-ellipsis-h"></i></div>
+                </div>`;
+            history.scrollTop = history.scrollHeight;
+
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: msg})
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(loadingId).remove();
+                history.innerHTML += `
+                    <div class="message bot-msg">
+                        <div class="bot-icon"><i class="fas fa-robot"></i></div>
+                        <div class="bot-bubble">${data.response}</div>
+                    </div>`;
+                history.scrollTop = history.scrollHeight;
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

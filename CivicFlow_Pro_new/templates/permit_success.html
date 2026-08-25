@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Submitted | CivicFlow Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER (Consistent) */
+        .gov-header {
+            background-color: #0b1e4c;
+            padding: 15px 0;
+            border-bottom: 5px solid #ff9933;
+        }
+
+        /* SUCCESS CARD */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .receipt-card {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Top Green Section */
+        .receipt-header {
+            background: #d1e7dd;
+            color: #0f5132;
+            padding: 30px 20px;
+        }
+        
+        /* Animated Checkmark */
+        .success-icon {
+            font-size: 4rem;
+            color: #198754;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 10px;
+        }
+
+        /* The "Cutout" Receipt Look */
+        .receipt-body {
+            padding: 30px;
+            position: relative;
+        }
+        .tracking-box {
+            border: 2px dashed #0b1e4c;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .tracking-id {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0b1e4c;
+            letter-spacing: 2px;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #e9ecef; }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="gov-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center me-5">
+                <i class="fas fa-check-circle text-warning fs-1 me-2"></i> 
+                <div>
+                    <div class="fw-bold fs-3 text-white" style="line-height: 1;">CivicFlow Pro</div>
+                    <div class="small text-white-50">Smart Permit Portal</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content p-3">
+        <div class="receipt-card">
+            
+            <div class="receipt-header">
+                <div class="success-icon"><i class="fas fa-file-signature"></i></div>
+                <h4 class="fw-bold mb-1">Application Submitted!</h4>
+                <p class="mb-0 small opacity-75">Your permit request has been securely logged.</p>
+            </div>
+
+            <div class="receipt-body">
+                <p class="text-muted small mb-1 text-uppercase fw-bold">Your Tracking Reference</p>
+                
+                <div class="tracking-box">
+                    <div class="tracking-id" id="tid">{{ tracking_id }}</div>
+                    <button class="copy-btn" onclick="copyID()" title="Copy to Clipboard">
+                        <i class="fas fa-copy text-secondary"></i>
+                    </button>
+                </div>
+
+                <div class="alert alert-warning small text-start mb-4">
+                    <i class="fas fa-hard-hat me-2"></i> <strong>Next Step:</strong> Field Verification.
+                    <br>An officer will visit your pinned GPS location.
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('permit_receipt', tracking_id=tracking_id) }}" class="btn btn-dark w-100 py-2 fw-bold shadow-sm" target="_blank">
+                        <i class="fas fa-file-download me-2"></i> Download Acknowledgement
+                    </a>
+
+                    <a href="{{ url_for('permission_portal') }}" class="btn btn-outline-primary py-2 fw-bold w-100" style="color: #0b1e4c; border-color: #0b1e4c;">
+                        Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyID() {
+            var copyText = document.getElementById("tid").innerText;
+            navigator.clipboard.writeText(copyText);
+            
+            // Visual feedback
+            var btn = document.querySelector('.copy-btn');
+            btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-copy text-secondary"></i>';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+text,department,urgency
+No water supply in our area,Water Board,High
+Low water pressure during morning hours,Water Board,Medium
+Water leakage from main pipeline,Water Board,High
+Contaminated drinking water,Water Board,Critical
+Water tank not cleaned regularly,Water Board,Medium
+
+Road damaged near school,Highway Department,High
+Potholes causing traffic congestion,Highway Department,High
+Road widening work incomplete,Highway Department,Medium
+No speed breakers near school zone,Highway Department,High
+Missing road signboards,Highway Department,Medium
+Footpath encroachment by vendors,Highway Department,Low
+
+Bus service not available,Public Transportation,High
+Irregular bus timings,Public Transportation,Medium
+Overcrowded buses during peak hours,Public Transportation,Medium
+Bus stop shelter damaged,Public Transportation,Low
+Old buses causing frequent breakdowns,Public Transportation,High
+No bus service after 9 PM,Public Transportation,Medium
+
+Electric wire sparking,Electricity Board,Critical
+Frequent power cuts at night,Electricity Board,High
+Electric pole damaged after storm,Electricity Board,Critical
+Transformer making loud noise,Electricity Board,High
+Street lights not working,Electricity Board,Medium
+Exposed electric cables on roadside,Electricity Board,Critical
+
+Drainage overflow near houses,Municipality,High
+Blocked drainage causing bad smell,Municipality,Medium
+Garbage not collected regularly,Municipality,Medium
+Open garbage dumping in vacant land,Municipality,Low
+Mosquito breeding due to stagnant water,Municipality,High
+Public toilet not cleaned regularly,Municipality,Medium
+Dead animal not removed from road,Municipality,High
+
+Flooding due to heavy rain,Disaster Management,Critical
+Tree fallen blocking road after rain,Disaster Management,Critical
+Emergency shelter not available during flood,Disaster Management,Critical
+Landslide risk during monsoon,Disaster Management,Critical
+River water level rising rapidly,Disaster Management,Critical
+
+Stray dogs attacking pedestrians,Animal Control,High
+Cattle roaming on main road,Animal Control,Medium
+Monkey menace in residential area,Animal Control,Medium
+
+Illegal parking causing traffic jam,Traffic Police,Medium
+Signal not working at junction,Traffic Police,High
+No traffic police during peak hours,Traffic Police,Medium
+Reckless driving near residential area,Traffic Police,High
+
+Theft reported in neighborhood,Police Department,High
+Street robbery incidents increasing,Police Department,High
+Suspicious activity near school,Police Department,High
+Loud noise after midnight,Police Department,Low
+
+Fire safety equipment not available,Fire Department,Critical
+Fire hydrant not functioning,Fire Department,High
+Chemical fire risk in factory area,Fire Department,Critical
+
+Government hospital lacks medicines,Health Department,High
+Ambulance delay during emergency,Health Department,Critical
+Unhygienic conditions in clinic,Health Department,Medium
+
+School building roof leakage,Education Department,Medium
+Lack of teachers in government school,Education Department,Medium
+Unsafe playground equipment,Education Department,High

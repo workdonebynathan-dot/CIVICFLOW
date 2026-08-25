@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Apply for Permit - CivicFlow Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <style>
+        body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        
+        .header-bg { 
+            background: #0b1e4c; 
+            color: white; padding: 25px 0; margin-bottom: 30px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        #map { height: 350px; width: 100%; border-radius: 10px; border: 2px solid #ddd; z-index: 1; }
+        
+        .btn-primary-custom { 
+            background-color: #0b1e4c; border-color: #0b1e4c; color: white; 
+            font-weight: bold; padding: 12px; border-radius: 8px;
+        }
+        .btn-primary-custom:hover { background-color: #0d2a6b; color: white; }
+
+        .ai-status {
+            font-size: 0.8rem; font-weight: bold; 
+            color: #0d6efd; background: #e7f1ff; 
+            padding: 5px 12px; border-radius: 20px;
+            border: 1px solid #b6d4fe;
+        }
+
+        .ai-glow { border: 2px solid #198754 !important; box-shadow: 0 0 10px rgba(25,135,84,0.2); transition: 0.3s; }
+
+        optgroup { font-weight: bold; color: #0b1e4c; background: #f8f9fa; }
+        option { padding: 5px; color: #333; }
+        
+        /* Style for the AI Option */
+        option[value="Other"] { font-weight: bold; color: #0b1e4c; background-color: #eef2f7; }
+    </style>
+</head>
+<body>
+
+<div class="header-bg">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="mb-0 fw-bold"><i class="fas fa-robot me-2"></i> Smart Permit Portal</h2>
+            <p class="mb-0 opacity-75">Automated MPNet Semantic Analysis & Routing</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm rounded-pill px-4">Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <form action="{{ url_for('submit_permission') }}" method="POST">
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="fw-bold">Application Description (The Motive)</label>
+                            <span class="ai-status" id="aiStatus">
+                                <i class="fas fa-bolt me-1"></i> Smart Analysis Active
+                            </span>
+                        </div>
+                        <textarea id="motiveInput" name="reason" class="form-control" rows="3" 
+                            placeholder="Describe your requirement (e.g., 'Need to dig a borewell for house construction')..." 
+                            onblur="triggerAI()" required></textarea>
+                        <div class="form-text text-muted">The AI will auto-select the category when you finish typing.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold mb-1">Permit Category</label>
+                        <select name="type" class="form-select" id="permitSelect" required>
+                            <option value="Other" selected>✨ Other (AI Auto-Detect)</option>
+                            <option value="" disabled>--------------------------------</option>
+                            
+                            <optgroup label="Property & Construction">
+                                <option value="Building Plan Approval">Building Plan Approval</option>
+                                <option value="Commencement Certificate">Commencement Certificate</option>
+                                <option value="Occupancy Certificate">Occupancy Certificate</option>
+                                <option value="Borewell Permission">Borewell Permission</option>
+                                <option value="Heritage/Airport NOC">Heritage / Airport NOC</option>
+                            </optgroup>
+
+                            <optgroup label="Utility & Infrastructure">
+                                <option value="Road Cutting Permission">Road Cutting Permission</option>
+                                <option value="Tree Felling Permit">Tree Felling Permit</option>
+                                <option value="Electrical Inspectorate Approval">Electrical Inspectorate Approval</option>
+                            </optgroup>
+
+                            <optgroup label="Events & Activities">
+                                <option value="Loudspeaker Permission">Loudspeaker Permission</option>
+                                <option value="Procession/Assembly Permission">Procession / Assembly</option>
+                                <option value="Performance License">Performance License</option>
+                                <option value="Entertainment Tax Clearance">Entertainment Tax Clearance</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold mb-1">Requested Start Date <span class="text-danger small">(Min 5 days)</span></label>
+                            <input type="date" name="start_date" class="form-control" id="startDatePicker" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold mb-1">Requested End Date <small class="text-muted">(Provisional)</small></label>
+                            <input type="date" name="end_date" class="form-control" id="endDatePicker">
+                            <small class="text-muted" style="font-size: 0.75rem;">Final duration set by Officer post-visit.</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="fw-bold mb-1"><i class="fas fa-map-marker-alt text-danger"></i> Site Location</label>
+                        <div id="map"></div>
+                        <small class="text-muted">Drag the pin to the exact location of the requirement.</small>
+                        <input type="hidden" name="latitude" id="lat">
+                        <input type="hidden" name="longitude" id="lng">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom w-100 shadow-sm">
+                        <i class="fas fa-paper-plane me-2"></i> Submit Application
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="guide-card shadow-sm" style="background: white; border-left: 5px solid #0b1e4c; padding: 25px; border-radius: 8px; height: 100%;">
+                <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-book-open me-2"></i> Submission Guide</h5>
+                
+                <div class="guide-item" style="display: flex; align-items: start; margin-bottom: 25px;">
+                    <i class="fas fa-magic text-success guide-icon" style="font-size: 1.1rem; margin-right: 15px; margin-top: 4px; flex-shrink: 0;"></i>
+                    <div>
+                        <div class="guide-title" style="font-weight: 700; color: #333; font-size: 0.95rem; margin-bottom: 4px;">Smart Auto-Detect</div>
+                        <div class="guide-text" style="font-size: 0.88rem; color: #666; line-height: 1.4;">Simply describe your need. Our AI will automatically select the correct legal permit category for you.</div>
+                    </div>
+                </div>
+
+                <div class="guide-item" style="display: flex; align-items: start; margin-bottom: 25px;">
+                    <i class="fas fa-location-dot text-danger guide-icon" style="font-size: 1.1rem; margin-right: 15px; margin-top: 4px; flex-shrink: 0;"></i>
+                    <div>
+                        <div class="guide-title" style="font-weight: 700; color: #333; font-size: 0.95rem; margin-bottom: 4px;">Field Verification</div>
+                        <div class="guide-text" style="font-size: 0.88rem; color: #666; line-height: 1.4;">An officer will visit the coordinates you pin on the map to verify site conditions.</div>
+                    </div>
+                </div>
+
+                <div class="guide-item" style="display: flex; align-items: start; margin-bottom: 25px;">
+                    <i class="fas fa-file-signature text-primary guide-icon" style="font-size: 1.1rem; margin-right: 15px; margin-top: 4px; flex-shrink: 0;"></i>
+                    <div>
+                        <div class="guide-title" style="font-weight: 700; color: #333; font-size: 0.95rem; margin-bottom: 4px;">Final Approval</div>
+                        <div class="guide-text" style="font-size: 0.88rem; color: #666; line-height: 1.4;">You will receive a notification and digital receipt once the officer finalizes the permit duration.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<script>
+    // 1. AUTOMATIC AI TRIGGER (ON BLUR)
+    async function triggerAI() {
+        const motive = document.getElementById('motiveInput').value;
+        const select = document.getElementById('permitSelect');
+        const status = document.getElementById('aiStatus');
+
+        if (motive.length < 8) return; // Too short to analyze
+
+        status.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Detecting Category...';
+        status.className = 'ai-status bg-warning-subtle text-warning-emphasis border-warning-subtle';
+
+        try {
+            const response = await fetch('/api/ai-predict-permit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({description: motive})
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                // A. Try Direct Value Match
+                select.value = data.category;
+
+                // B. Fuzzy Fallback (If exact match fails, check keywords)
+                // If value is still "Other", try to find a partial match
+                if (select.value === "Other") { 
+                    const options = select.options;
+                    for (let i = 0; i < options.length; i++) {
+                        // Check if predicted category is inside option text
+                        if (options[i].text.toLowerCase().includes(data.category.toLowerCase())) {
+                            select.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                // C. Update Status UI
+                status.innerHTML = `<i class="fas fa-check-circle"></i> AI Selected: ${data.category}`;
+                status.className = 'ai-status bg-success-subtle text-success-emphasis border-success-subtle';
+                
+                // Visual Flash on Dropdown
+                select.classList.add('ai-glow');
+                setTimeout(() => select.classList.remove('ai-glow'), 2000);
+            }
+        } catch (e) { 
+            console.error("AI Error:", e);
+            status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Manual Selection Required';
+            status.className = 'ai-status bg-danger-subtle text-danger-emphasis';
+        }
+    }
+
+    // 2. SUPER-FAST MAP LOGIC (ArcGIS Geocoder Fix)
+    var map = L.map('map').setView([9.9312, 76.2673], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    var marker = L.marker([9.9312, 76.2673], { draggable: true }).addTo(map);
+
+    function updateInputs(lat, lng) {
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+    }
+    updateInputs(9.9312, 76.2673);
+
+    marker.on('dragend', function(e) {
+        var pos = marker.getLatLng();
+        updateInputs(pos.lat, pos.lng);
+    });
+
+    // FIXED GEOCODER: Switched to ArcGIS for instant, buffer-free searching
+    var geocoder = L.Control.geocoder({ 
+        defaultMarkGeocode: false,
+        geocoder: L.Control.Geocoder.arcgis()
+    }).on('markgeocode', function(e) {
+        var center = e.geocode.center;
+        map.setView(center, 16);
+        marker.setLatLng(center);
+        updateInputs(center.lat, center.lng);
+    }).addTo(map);
+
+// 3. DATE LOGIC (Prevents End Date from being before Start Date)
+    const startDatePicker = document.getElementById('startDatePicker');
+    const endDatePicker = document.getElementById('endDatePicker');
+    
+    if(startDatePicker) {
+        const today = new Date();
+        today.setDate(today.getDate() + 5); // Start date minimum is 5 days from now
+        startDatePicker.min = today.toISOString().split('T')[0];
+
+        // When the user picks a Start Date, force the End Date to be AFTER it
+        startDatePicker.addEventListener('change', function() {
+            if (endDatePicker) {
+                endDatePicker.min = this.value; // Set minimum end date
+                
+                // If they already picked an end date that is now invalid, clear it
+                if(endDatePicker.value && endDatePicker.value < this.value) {
+                    endDatePicker.value = "";
+                }
+            }
+        });
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

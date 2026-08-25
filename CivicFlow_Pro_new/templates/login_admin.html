@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Login | CivicFlow Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #0b1e4c 0%, #2a5298 100%); 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0;
+        }
+        .login-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+            width: 100%; 
+            max-width: 420px; 
+            border-top: 5px solid #ff9933; /* Official Orange Accent */
+        }
+        .brand-header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #0b1e4c; 
+        }
+        .form-control, .form-select {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #ff9933;
+            box-shadow: 0 0 0 0.2rem rgba(255, 153, 51, 0.25);
+        }
+        .btn-login { 
+            background-color: #0b1e4c; 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        .btn-login:hover { 
+            background-color: #ff9933; 
+            transform: translateY(-2px); 
+        }
+        .caps-warning {
+            color: #dc3545;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: none;
+            margin-top: 5px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="brand-header">
+            <i class="fas fa-building fa-3x mb-3 text-warning"></i>
+            <h3 class="fw-bold">Department Portal</h3>
+            <p class="text-muted small text-uppercase fw-bold">Authorized Personnel Only</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show text-center small" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" autocomplete="off">
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold small text-muted">SELECT DEPARTMENT</label>
+                <select name="department" class="form-select" required>
+                    <option value="" disabled selected>-- Select Your Department --</option>
+                    
+                    <optgroup label="Grievance & Public Safety">
+                        <option value="PWD (Roads & Bridges)">PWD (Roads & Bridges)</option>
+                        <option value="KSEB (Electricity)">KSEB (Electricity)</option>
+                        <option value="Water Authority (Supply/Sewage)">Water Authority (Supply/Sewage)</option>
+                        <option value="Police Department">Police Department</option>
+                        <option value="Health Department">Health Department</option>
+                        <option value="Fire & Rescue Force">Fire & Rescue Force</option>
+                        <option value="Municipality (Local Body)">Municipality (Local Body)</option>
+                    </optgroup>
+
+                    <optgroup label="Permission & Licensing">
+                        <option value="Building Plan Approval">Building Plan Approval</option>
+                        <option value="Borewell Permission">Borewell Permission</option>
+                        <option value="Electrical Inspectorate Approval">Electrical Inspectorate Approval</option>
+                        <option value="Road Cutting Permission">Road Cutting Permission</option>
+                        <option value="Tree Felling Permit">Tree Felling Permit</option>
+                        <option value="Loudspeaker Permission">Loudspeaker Permission</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold small text-muted">OFFICIAL EMAIL</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-envelope text-secondary"></i></span>
+                    <input type="email" name="email" class="form-control" required placeholder="officer@admin.com" autocomplete="username">
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="form-label fw-bold small text-muted">PASSWORD</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-key text-secondary"></i></span>
+                    <input type="password" name="password" id="passwordInput" class="form-control" required placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <div id="capsWarning" class="caps-warning">
+                    <i class="fas fa-exclamation-triangle me-1"></i> Warning: Caps Lock is ON
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-login shadow-sm">
+                    <i class="fas fa-lock me-2"></i> Secure Login
+                </button>
+            </div>
+        </form>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="text-decoration-none text-muted small">
+                &larr; Return to Main Hub
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const passwordInput = document.getElementById("passwordInput");
+        const capsWarning = document.getElementById("capsWarning");
+
+        // Caps Lock detection logic
+        const checkCapsLock = (event) => {
+            if (event.getModifierState("CapsLock")) {
+                capsWarning.style.display = "block";
+            } else {
+                capsWarning.style.display = "none";
+            }
+        };
+
+        passwordInput.addEventListener("keyup", checkCapsLock);
+        passwordInput.addEventListener("click", checkCapsLock);
+    </script>
+</body>
+</html> 

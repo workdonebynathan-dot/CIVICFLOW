@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplicate Detected | CivicFlow Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            background-color: #f0f2f5; 
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            min-height: 100vh;
+        }
+        .gov-header {
+            background: #0b1e4c; padding: 15px 0; color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .duplicate-card {
+            background: white; padding: 40px; border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08); 
+            border-top: 5px solid #ffc107;
+            margin-top: 40px;
+        }
+        .btn-cosign {
+            background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+            color: white; font-weight: bold; padding: 12px 25px; border-radius: 8px;
+            width: 100%; border: none; font-size: 1.1rem;
+        }
+        .btn-cosign:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(25, 135, 84, 0.3); color: white; }
+        
+        .btn-anyway {
+            background: #f8f9fa; color: #495057; font-weight: 600;
+            padding: 12px 25px; border-radius: 8px; width: 100%; border: 1px solid #dee2e6;
+        }
+        .btn-anyway:hover { background: #e2e6ea; }
+        
+        .similarity-badge {
+            background: #fff3cd; color: #856404; font-weight: bold;
+            padding: 5px 12px; border-radius: 20px; font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="gov-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-landmark text-warning fs-3 me-3"></i>
+                <div class="fw-bold fs-5">CivicFlow Pro</div>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm rounded-pill px-4">Cancel</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="duplicate-card text-center">
+                    <i class="fas fa-exclamation-triangle text-warning fa-4x mb-3"></i>
+                    <h2 class="fw-bold text-dark">Wait! Is this the same issue?</h2>
+                    <p class="text-muted mb-4">Our AI detected that <strong>{{ duplicate.upvotes }} other citizen(s)</strong> have already reported a very similar issue in this category.</p>
+                    
+                    <div class="card text-start bg-light mb-4 shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-secondary">ID: {{ duplicate.tracking_id }}</span>
+                                <span class="similarity-badge"><i class="fas fa-robot"></i> AI Match > 80%</span>
+                            </div>
+                            <h5 class="fw-bold text-primary">{{ duplicate.department }}</h5>
+                            <p class="text-dark">{{ duplicate.complaint }}</p>
+                            <div class="text-muted small">
+                                <i class="fas fa-map-marker-alt text-danger me-1"></i> Location: {{ duplicate.latitude }}, {{ duplicate.longitude }}<br>
+                                <i class="fas fa-info-circle text-info me-1"></i> Status: {{ duplicate.status }} ({{ duplicate.current_desk }})
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <form action="{{ url_for('upvote_complaint', tracking_id=duplicate.tracking_id) }}" method="POST">
+                                <button type="submit" class="btn btn-cosign shadow-sm">
+                                    <i class="fas fa-thumbs-up me-2"></i> Yes, Co-sign this Issue
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <form action="{{ url_for('submit') }}" method="POST">
+                                <!-- Pass through form data -->
+                                <input type="hidden" name="category" value="{{ form_data.category }}">
+                                <input type="hidden" name="complaint" value="{{ form_data.complaint }}">
+                                <input type="hidden" name="landmark" value="{{ form_data.landmark }}">
+                                <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
+                                <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+                                <input type="hidden" name="existing_image" value="{{ form_data.existing_image }}">
+                                <input type="hidden" name="force_submit" value="true">
+                                
+                                <button type="submit" class="btn btn-anyway">
+                                    No, Submit Mine Anyway
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

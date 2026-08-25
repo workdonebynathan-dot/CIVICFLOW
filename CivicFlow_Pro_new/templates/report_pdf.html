@@ -1,0 +1,100 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            @page { size: A4; margin: 1cm; }
+            body { font-family: 'Helvetica', sans-serif; color: #333; font-size: 11px; }
+            
+            /* HEADER */
+            .header { text-align: center; border-bottom: 2px solid #0b1e4c; padding-bottom: 10px; margin-bottom: 20px; }
+            .logo { font-size: 24px; font-weight: bold; color: #0b1e4c; margin-bottom: 5px; }
+            .sub-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #555; }
+            .meta { font-size: 10px; color: #777; margin-top: 5px; }
+
+            /* WATERMARK */
+            .watermark {
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 80px; color: rgba(0,0,0,0.05); font-weight: bold; text-transform: uppercase; z-index: -1;
+            }
+
+            /* TABLE */
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { background-color: #0b1e4c; color: white; padding: 10px; text-align: left; font-size: 10px; text-transform: uppercase; }
+            td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: top; line-height: 1.4; }
+            tr:nth-child(even) { background-color: #f8f9fa; }
+
+            /* STATUS BADGES */
+            .badge { padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 9px; color: white; display: inline-block; }
+            .bg-high { background-color: #dc3545; }      /* Red */
+            .bg-med { background-color: #ffc107; color: black; } /* Yellow */
+            .bg-resolved { background-color: #198754; }  /* Green */
+            .bg-pending { background-color: #0d6efd; }   /* Blue */
+            .bg-rejected { background-color: #6c757d; }  /* Grey */
+
+            /* FOOTER */
+            .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8px; color: #aaa; border-top: 1px solid #eee; padding-top: 10px; }
+        </style>
+    </head>
+    <body>
+
+        <div class="watermark">CONFIDENTIAL</div>
+
+        <div class="header">
+            <div class="logo">🏛️ CivicFlow Municipal Report</div>
+            <div class="sub-title">Official Grievance Log & Status Report</div>
+            <div class="meta">Generated On: {{ date }} | Authorized By: System Administrator</div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="15%">Tracking ID</th>
+                    <th width="18%">Department</th>
+                    <th width="10%">Urgency</th>
+                    <th width="12%">Status</th>
+                    <th width="45%">Issue Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in complaints %}
+                <tr>
+                    <td>
+                        <strong>#{{ c.tracking_id }}</strong>
+                        <br><span style="color: #777; font-size: 9px;">{{ c.created_at }}</span>
+                    </td>
+                    
+                    <td>{{ c.department }}</td>
+                    
+                    <td>
+                        {% if c.urgency == 'High' or c.urgency == 'Critical' %}
+                            <span class="badge bg-high">CRITICAL</span>
+                        {% else %}
+                            <span class="badge bg-med">NORMAL</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        {% if c.status == 'Resolved' %}
+                            <span class="badge bg-resolved">RESOLVED</span>
+                        {% elif c.status == 'Rejected' %}
+                            <span class="badge bg-rejected">REJECTED</span>
+                        {% else %}
+                            <span class="badge bg-pending">{{ c.status|upper }}</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        {% set text = c.complaint or '' %}
+                        {{ text[:150] }}{% if text|length > 150 %}...{% endif %}
+                    </td>
+                </tr>   
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="footer">
+            CivicFlow Pro Smart Governance System • This document is electronically generated and strictly confidential.
+        </div>
+
+    </body>
+    </html>

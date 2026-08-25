@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Complaint Timeline</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .search-card { width: 100%; max-width: 500px; background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="search-card text-center">
+        <h2 class="mb-3">🕒 Complaint Timeline</h2>
+        <p class="text-muted mb-4">Enter your Tracking ID to view the full history of updates.</p>
+        
+        <form action="{{ url_for('track') }}" method="POST">
+            <div class="input-group mb-3">
+                <input type="text" name="tracking" class="form-control form-control-lg" placeholder="e.g. a1b2c3d4" required>
+                <button class="btn btn-primary" type="submit">View Timeline</button>
+            </div>
+        </form>
+        
+        <a href="{{ url_for('dashboard') }}" class="text-decoration-none text-muted small">← Return to Dashboard</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Official Receipt | CivicFlow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #555; padding: 50px; font-family: 'Times New Roman', serif; }
+        .receipt-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .watermark {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            color: rgba(0,0,0,0.05);
+            font-weight: bold;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .header-section { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+        .official-seal { width: 80px; margin-bottom: 10px; opacity: 0.8; }
+        .receipt-table th { width: 40%; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-container">
+        <div class="watermark">OFFICIAL</div>
+
+        <div class="header-section">
+            <h2 class="fw-bold text-uppercase">Grievance Acknowledgment</h2>
+            <p class="mb-0">Municipal Corporation of City</p>
+            <small class="text-muted">CivicFlow Pro Digital Portal</small>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-6">
+                <strong>Date:</strong> {{ date }}<br>
+                <strong>Time:</strong> {{ c.created_at }}
+            </div>
+            <div class="col-6 text-end">
+                <h5 class="text-danger fw-bold">ID: #{{ c.tracking_id }}</h5>
+            </div>
+        </div>
+
+        <table class="table table-bordered receipt-table">
+            <tr>
+                <th>Applicant Name</th>
+                <td>{{ c.citizen_name }}</td>
+            </tr>
+            <tr>
+                <th>Department</th>
+                <td>{{ c.department }}</td>
+            </tr>
+            <tr>
+                <th>Priority Level</th>
+                <td>
+                    {% if c.urgency == 'Critical' %}
+                        <span class="badge bg-danger">CRITICAL</span>
+                    {% else %}
+                        {{ c.urgency }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Subject</th>
+                <td>{{ (c.complaint or '')[:100] }}...</td>
+            </tr>
+        </table>
+
+        <div class="alert alert-light border text-center mt-4">
+            <p class="mb-1 fw-bold">Digital Signature Verified</p>
+            <small class="text-muted">This is a system-generated receipt. No physical signature required.</small>
+        </div>
+
+        <div class="text-center d-print-none mt-4">
+            <button onclick="window.print()" class="btn btn-primary btn-lg">🖨️ Print Receipt</button>
+            <a href="javascript:window.close()" class="btn btn-link text-muted">Close Window</a>
+        </div>
+    </div>
+
+</body>
+</html>

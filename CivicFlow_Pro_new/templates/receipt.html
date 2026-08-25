@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ 'Permit Acknowledgment' if c.type else 'Grievance Receipt' }} | #{{ c.tracking_id }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #e0e0e0;
+            font-family: 'Times New Roman', Times, serif; /* Official Document Font */
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .receipt-container {
+            background: white;
+            width: 210mm; /* A4 Width */
+            min-height: 297mm; /* A4 Height */
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #ccc;
+        }
+
+        /* WATERMARK BACKGROUND */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            color: rgba(0, 0, 0, 0.03);
+            font-weight: bold;
+            text-transform: uppercase;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            border-bottom: 3px double #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        .header img { width: 80px; margin-bottom: 10px; }
+        .header h2 { margin: 5px 0; text-transform: uppercase; letter-spacing: 1px; color: #333; }
+        .header h4 { margin: 0; font-weight: normal; color: #555; }
+        .header .doc-id { position: absolute; top: 0; right: 0; font-size: 12px; color: #777; font-family: sans-serif; }
+
+        /* CONTENT */
+        .content { position: relative; z-index: 1; font-family: sans-serif; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #eee;
+            border: 1px solid #333;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .details-table th, .details-table td {
+            border: 1px solid #999;
+            padding: 12px;
+            text-align: left;
+        }
+        .details-table th { background: #f9f9f9; width: 35%; color: #333; }
+
+        /* FOOTER & SEAL */
+        .footer {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .qr-code img { width: 100px; height: 100px; border: 1px solid #eee; }
+        
+        .signature-area { text-align: center; }
+        .seal {
+            width: 120px;
+            height: 120px;
+            border: 3px double #c0392b;
+            border-radius: 50%;
+            color: #c0392b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+            transform: rotate(-15deg);
+            opacity: 0.8;
+            margin: 0 auto 10px auto;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .disclaimer {
+            margin-top: 40px;
+            font-size: 10px;
+            text-align: center;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            color: #777;
+        }
+
+        /* PRINT BUTTON (Hidden when printing) */
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: #0b1e4c;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-size: 16px;
+            font-family: sans-serif;
+            z-index: 100;
+        }
+        .print-btn:hover { background: #0d2a6b; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .receipt-container { box-shadow: none; border: none; width: 100%; }
+            .print-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">
+        <i class="fas fa-print me-2"></i> Print Official Copy
+    </button>
+
+    <div class="receipt-container">
+        <div class="watermark">OFFICIAL COPY</div>
+
+        <div class="header">
+            <div class="doc-id">Form No: {{ 'PRM' if c.type else 'GRV' }}-{{ c.tracking_id }}</div>
+            <i class="fas fa-landmark fa-3x" style="color: #333; margin-bottom: 10px;"></i>
+            <h2>Ministry of Smart Governance</h2>
+            <h4>CivicFlow Pro Digital Portal</h4>
+            <p style="font-size: 12px; margin-top: 5px;">
+                {{ 'Permit Application & Field Verification Memo' if c.type else 'Acknowledgement of Complaint Registration' }}
+            </p>
+        </div>
+
+        <div class="content">
+            <div style="text-align: right; margin-bottom: 10px;">
+                <strong>Generated Date:</strong> {{ date.strftime('%d-%m-%Y') }}
+            </div>
+
+            <div class="status-badge">
+                STATUS: {{ c.status | upper }}
+            </div>
+
+            <p>Dear <strong>{{ c.citizen_name or c.student_name }}</strong>,</p>
+            
+            {% if c.type %}
+                <p>This document acknowledges your application for a professional permit. As per standard protocol, your <strong>Permitted Days</strong> and <strong>Final Approval</strong> will be decided by the designated officer following a successful <strong>Field Verification</strong> at your site location.</p>
+            {% else %}
+                <p>This is to acknowledge that your grievance has been successfully registered. Your issue has been routed via semantic AI to the relevant department for immediate resolution.</p>
+            {% endif %}
+
+            <table class="details-table">
+                <tr>
+                    <th>Tracking ID</th>
+                    <td><strong>{{ c.tracking_id }}</strong></td>
+                </tr>
+                <tr>
+                    <th>Service Category</th>
+                    <td>{{ c.type or c.department }}</td>
+                </tr>
+                <tr>
+                    <th>Motive / Description</th>
+                    <td>{{ c.reason or c.complaint }}</td>
+                </tr>
+                <tr>
+                    <th>Site Location (GPS)</th>
+                    <td>
+                        {% if c.latitude %}
+                            <i class="fas fa-map-marker-alt text-danger"></i> {{ c.latitude }}, {{ c.longitude }}
+                        {% else %}
+                            Address not tagged (Manual Entry)
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Requested Start Date</th>
+                    <td>{{ c.start_date or c.created_at }}</td>
+                </tr>
+                <tr>
+                    <th>Permitted Duration</th>
+                    <td>
+                        {% if c.status == 'Approved' and c.end_date %}
+                            Valid until <strong>{{ c.end_date }}</strong>
+                        {% elif c.status == 'Rejected' %}
+                            N/A (Application Rejected)
+                        {% else %}
+                            <span style="color: #666; font-style: italic;">Subject to Officer Decision post-Field Verification</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            <div class="qr-code">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CivicFlow-{{ c.tracking_id }}" alt="QR Code">
+                <div style="font-size: 10px; margin-top: 5px; text-align: center;">Scan to Track Status</div>
+            </div>
+
+            <div class="signature-area">
+                <div class="seal">
+                    CivicFlow<br>Verified<br>System
+                </div>
+                <div style="margin-top: 10px; border-top: 1px solid #333; width: 200px; margin-left: auto; margin-right: auto;"></div>
+                <div style="font-size: 12px; margin-top: 5px;">Authorized Digital Signature</div>
+                <div style="font-size: 10px; color: #555;">(CivicFlow AI Verification)</div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            This is a 2026 computer-generated document and does not require a physical signature. <br>
+            Officers will use the GPS coordinates provided for physical site inspection. <br>
+            Verify authenticity at <strong>www.civicflow.gov.inx</strong>.
+        </div>
+    </div>
+
+</body>
+</html>

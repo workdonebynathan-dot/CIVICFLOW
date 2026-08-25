@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Issue | CivicFlow Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <style>
+        body { 
+            background-color: #f0f2f5; 
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .gov-header {
+            background: #0b1e4c;
+            padding: 15px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            color: white;
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        /* FORM CARD */
+        .form-card {
+            border: none; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08); 
+            position: relative; 
+            overflow: hidden;
+            border-top: 5px solid #0d6efd; 
+        }
+
+        /* GUIDELINES SIDEBAR */
+        .guidelines-card {
+            background-color: white;
+            border: none;
+            border-left: 4px solid #0b1e4c;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: sticky; top: 100px;
+        }
+        .guide-item { margin-bottom: 20px; display: flex; align-items: start; font-size: 0.9rem; color: #555; }
+        .guide-icon { color: #198754; margin-top: 3px; margin-right: 12px; flex-shrink: 0; font-size: 1.1rem; }
+
+        /* AI BADGE */
+        .ai-badge {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #0b1e4c; font-size: 0.8rem; padding: 6px 15px;
+            border-radius: 30px; display: inline-flex; align-items: center;
+            font-weight: 700; border: 1px solid #90caf9;
+        }
+        .ai-pulse {
+            width: 8px; height: 8px; background-color: #0d6efd; border-radius: 50%;
+            margin-right: 8px; box-shadow: 0 0 0 rgba(13, 110, 253, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(13, 110, 253, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+        }
+
+        /* INPUTS */
+        .form-control, .form-select {
+            padding: 12px; border-radius: 10px; border: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: white; border-color: #0b1e4c; 
+            box-shadow: 0 0 0 0.2rem rgba(11, 30, 76, 0.1);
+        }
+        .form-label { font-weight: 600; color: #495057; font-size: 0.9rem; }
+
+        /* MIC BUTTON */
+        .mic-btn {
+            position: absolute; bottom: 12px; right: 12px; width: 40px; height: 40px;
+            border-radius: 50%; background: white; border: 1px solid #dee2e6; color: #6c757d;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .mic-btn:hover { background: #e9ecef; transform: scale(1.1); color: #0b1e4c; }
+        .mic-btn.listening {
+            background: #dc3545; color: white; border-color: #dc3545; animation: pulse 1.5s infinite;
+        }
+
+        /* MAP */
+        #map { height: 250px; width: 100%; border-radius: 12px; border: 2px solid #dee2e6; margin-top: 15px; z-index: 1;}
+        .leaflet-control-geocoder { border-radius: 8px !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; border: none !important;}
+
+        /* UPLOAD */
+        .file-upload-wrapper {
+            border: 2px dashed #cbd5e1; border-radius: 12px; padding: 25px;
+            text-align: center; background: #f8fafc; transition: all 0.3s;
+            cursor: pointer; position: relative;
+        }
+        .file-upload-wrapper:hover { border-color: #0d6efd; background: #f0f7ff; }
+        .file-upload-wrapper input {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
+        }
+
+        /* BUTTONS */
+        .btn-submit {
+            background: linear-gradient(135deg, #0b1e4c 0%, #1a4a9c 100%); 
+            color: white; font-weight: bold; border: none; padding: 15px; border-radius: 10px;
+            transition: all 0.3s; font-size: 1.1rem; width: 100%;
+        }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(11, 30, 76, 0.2); }
+        
+        .btn-location {
+            background-color: #0b1e4c; color: white; border-radius: 10px; padding: 10px;
+            width: 100%; font-weight: 600; margin-top: 5px;
+        }
+        .btn-location:hover { background-color: #1a3a7a; color: white; }
+    </style>
+</head>
+<body>
+
+    <header class="gov-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-landmark text-warning fs-3 me-3"></i>
+                <div>
+                    <div class="fw-bold fs-5" style="line-height: 1.2;">CivicFlow Pro</div>
+                    <div class="small opacity-75" style="font-size: 0.75rem; letter-spacing: 1px;">OFFICIAL CITIZEN PORTAL</div>
+                </div>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm rounded-pill px-4">
+                <i class="fas fa-times me-2"></i> Cancel
+            </a>
+        </div>
+    </header>
+
+    <div class="container my-5">
+        <div class="row justify-content-center g-4">
+            
+            <div class="col-lg-7">
+                <div class="form-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold text-dark mb-0">New Grievance</h3>
+                        <div class="ai-badge">
+                            <div class="ai-pulse"></div>
+                            Smart Routing Active
+                        </div>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form action="{{ url_for('submit') }}" method="POST" enctype="multipart/form-data">
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Responsible Department <span class="text-danger">*</span></label>
+                            <select name="category" class="form-select" required>
+                                <option value="" disabled selected>-- Select Department --</option>
+                                <optgroup label="🏗️ Infrastructure">
+                                    <option value="Roads">PWD (Roads & Bridges)</option>
+                                    <option value="Electricity">KSEB (Electricity)</option>
+                                    <option value="Water">Water Authority (Supply/Sewage)</option>
+                                </optgroup>
+                                <optgroup label="🚑 Emergency & Safety">
+                                    <option value="Police">Police Department</option>
+                                    <option value="Fire">Fire & Rescue Force</option>
+                                    <option value="Health">Health Department</option>
+                                </optgroup>
+                                <optgroup label="🏛️ Governance">
+                                    <option value="Municipality">Municipality (Local Body)</option>
+                                    <option value="Revenue">Revenue & Land Department</option>
+                                    <option value="Education">Education Department</option>
+                                </optgroup>
+                                <optgroup label="🌾 Services">
+                                    <option value="Agriculture">Agriculture Department</option>
+                                    <option value="Ration">Civil Supplies (Ration Shops)</option>
+                                    <option value="Labor">Labor Department</option>
+                                </optgroup>
+                                <option value="Other">Other (AI Auto-Detect)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4 position-relative">
+                            <label class="form-label">Issue Details <span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <textarea name="complaint" id="complaintBox" class="form-control" rows="4" placeholder="Describe the issue clearly..." required></textarea>
+                                <button type="button" class="mic-btn" id="micBtn" title="Voice Typing">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                            </div>
+                            <small id="micStatus" class="text-danger fw-bold fst-italic float-end mt-1" style="font-size: 0.8rem;"></small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Location <span class="text-danger">*</span></label>
+                            
+                            <div class="input-group mb-2">
+                                <span class="input-group-text bg-white"><i class="fas fa-map-marker-alt text-danger"></i></span>
+                                <input type="text" name="landmark" id="locationInput" class="form-control" placeholder="Location not set (Use GPS)" readonly required>
+                            </div>
+
+                            <button type="button" id="locBtn" class="btn btn-location" onclick="getCurrentLocation()">
+                                <i class="fas fa-crosshairs me-2"></i> Use My Current Location
+                            </button>
+
+                            <div id="map"></div>
+                            
+                            <input type="hidden" name="latitude" id="latField">
+                            <input type="hidden" name="longitude" id="lonField">
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label">Evidence (Optional)</label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" name="image" accept="image/*" onchange="previewFile(this)">
+                                <div id="upload-content">
+                                    <i class="fas fa-cloud-upload-alt fa-2x text-secondary mb-2 opacity-50"></i>
+                                    <h6 class="text-dark fw-bold m-0">Upload Photo</h6>
+                                    <small class="text-muted" style="font-size: 0.75rem;">JPG/PNG Max 5MB</small>
+                                </div>
+                                <div id="file-selected" class="d-none text-success fw-bold mt-2">
+                                    <i class="fas fa-check-circle me-2"></i> <span id="filename-display"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-submit shadow">
+                            SUBMIT COMPLAINT <i class="fas fa-paper-plane ms-2"></i>
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="guidelines-card">
+                    <h5 class="fw-bold mb-4" style="color: #0b1e4c;"><i class="fas fa-book-open me-2"></i> Submission Guide</h5>
+                    
+                    <div class="guide-item">
+                        <i class="fas fa-check-circle guide-icon"></i>
+                        <div>
+                            <strong>Pick Category:</strong>
+                            <div class="text-muted small mt-1">Select the exact department (e.g., KSEB) so it reaches the right officer instantly.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-item">
+                        <i class="fas fa-check-circle guide-icon"></i>
+                        <div>
+                            <strong>Pin the Spot:</strong>
+                            <div class="text-muted small mt-1">Click "Use My Current Location" or drag the blue pin on the map. You can also search for a landmark.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-item">
+                        <i class="fas fa-check-circle guide-icon"></i>
+                        <div>
+                            <strong>Upload Proof:</strong>
+                            <div class="text-muted small mt-1">A photo is worth 1000 words. It helps officers prioritize urgent fixes.</div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4 opacity-25">
+                    
+                    <div class="alert alert-light border mb-0 text-center shadow-sm">
+                        <small class="text-muted fst-italic">
+                            "Your vigilance makes our city better."
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // 1. PREVIEW FILE
+        function previewFile(input) {
+            const file = input.files[0];
+            if(file){
+                document.getElementById('upload-content').classList.add('opacity-50');
+                document.getElementById('file-selected').classList.remove('d-none');
+                document.getElementById('filename-display').innerText = file.name;
+            }
+        }
+
+        // 2. VOICE RECOGNITION
+        const micBtn = document.getElementById('micBtn');
+        const complaintBox = document.getElementById('complaintBox');
+        const micStatus = document.getElementById('micStatus');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false; 
+            recognition.lang = 'en-US';
+            
+            micBtn.addEventListener('click', () => { 
+                if (micBtn.classList.contains('listening')) recognition.stop(); 
+                else recognition.start(); 
+            });
+
+            recognition.onstart = () => { 
+                micBtn.classList.add('listening'); 
+                micStatus.innerText = "Listening... Speak now"; 
+            };
+            
+            recognition.onend = () => { 
+                micBtn.classList.remove('listening'); 
+                micStatus.innerText = ""; 
+            };
+            
+            recognition.onresult = (event) => { 
+                const transcript = event.results[0][0].transcript;
+                complaintBox.value += (complaintBox.value.length > 0 ? " " : "") + transcript; 
+            };
+        } else { 
+            micBtn.style.display = 'none'; 
+        }
+
+        // 3. MAP & GPS LOGIC
+        // Initialize Map (Default: Kerala Center)
+        var map = L.map('map').setView([9.9816, 76.2999], 13); 
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+            attribution: '© OpenStreetMap contributors' 
+        }).addTo(map);
+
+        var marker = L.marker([9.9816, 76.2999], {draggable: true}).addTo(map);
+
+        // Function to update hidden inputs
+        function updateInputs(lat, lng) {
+            document.getElementById('latField').value = lat;
+            document.getElementById('lonField').value = lng;
+        }
+
+        // Event: When user drags marker manually
+        marker.on('dragend', function(event) {
+            var position = marker.getLatLng();
+            updateInputs(position.lat, position.lng);
+            document.getElementById('locationInput').value = "Pinned: " + position.lat.toFixed(4) + ", " + position.lng.toFixed(4);
+        });
+
+        // ADDED: Search Bar (Geocoder) Logic
+        var geocoder = L.Control.geocoder({
+            defaultMarkGeocode: false,
+            placeholder: "🔍 Search street or landmark..."
+        })
+        .on('markgeocode', function(e) {
+            var latlng = e.geocode.center;
+            map.setView(latlng, 16); // Zoom in on the searched location
+            marker.setLatLng(latlng); // Move the blue pin there
+            updateInputs(latlng.lat, latlng.lng); // Update the hidden backend fields
+            document.getElementById('locationInput').value = "Searched: " + e.geocode.name.substring(0, 30) + "...";
+        })
+        .addTo(map);
+
+        // Event: "Use My Current Location" Button
+        function getCurrentLocation() {
+            const btn = document.getElementById('locBtn');
+            const statusBox = document.getElementById('locationInput');
+            
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Fetching GPS...';
+            statusBox.value = "Fetching GPS...";
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+                    
+                    // Update Map & Marker
+                    map.setView([lat, lng], 16);
+                    marker.setLatLng([lat, lng]);
+                    
+                    // Update Fields
+                    updateInputs(lat, lng);
+                    statusBox.value = " GPS Found: " + lat.toFixed(4) + ", " + lng.toFixed(4);
+                    
+                    // Reset Button
+                    btn.innerHTML = '<i class="fas fa-check"></i> Location Set';
+                    btn.classList.remove('btn-location');
+                    btn.classList.add('btn-success');
+                    
+                }, function(error) { 
+                    alert("Error getting location. Please enable GPS."); 
+                    btn.innerHTML = '<i class="fas fa-redo"></i> Retry GPS';
+                    statusBox.value = "GPS Error";
+                });
+            } else { 
+                alert("GPS Not Supported by this browser"); 
+            }
+        }
+
+        // Initialize with default values
+        updateInputs(9.9816, 76.2999);
+    </script>
+</body>
+</html>

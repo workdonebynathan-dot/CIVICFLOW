@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings | CivicFlow Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { min-height: 100vh; background: #0b1e4c; color: white; }
+        .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { background: #ff9933; color: black; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar p-0">
+            <div class="p-4 border-bottom border-secondary">
+                <div class="fw-bold fs-4"><i class="fas fa-shield-alt text-warning"></i> AdminPanel</div>
+                <div class="small text-white-50">CivicFlow Pro v1.0</div>
+            </div>
+            <nav class="nav flex-column mt-3">
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-chart-line me-2"></i> Dashboard</a>
+                <a class="nav-link" href="{{ url_for('admin_officers') }}"><i class="fas fa-users me-2"></i> Officers</a>
+                <a class="nav-link active" href="#"><i class="fas fa-cogs me-2"></i> Settings</a>
+                <a class="nav-link text-danger mt-5" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+            </nav>
+        </div>
+
+        <div class="col-md-10 p-5">
+            <h2 class="fw-bold mb-4">System Settings</h2>
+            
+            <div class="card p-4 border-0 shadow-sm rounded-4" style="max-width: 600px;">
+                <h5 class="mb-3">Security</h5>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Update Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="Enter new password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

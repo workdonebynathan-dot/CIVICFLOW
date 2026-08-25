@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Track Grievance | CivicFlow Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+
+        /* HERO SEARCH SECTION */
+        .track-hero {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            padding: 60px 0;
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .search-input {
+            height: 55px;
+            border-radius: 30px;
+            padding-left: 25px;
+            padding-right: 60px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            height: 45px;
+            width: 45px;
+            border-radius: 50%;
+            border: none;
+            background: #1a2980;
+            color: white;
+            transition: 0.3s;
+        }
+        .search-btn:hover { background: #000; transform: scale(1.05); }
+
+        /* TIMELINE STYLES */
+        .timeline {
+            border-left: 3px solid #e9ecef;
+            margin-left: 20px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .timeline-item {
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #e9ecef;
+            position: absolute;
+            left: -51px;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+            z-index: 1;
+        }
+        
+        /* ACTIVE STATE (Green) */
+        .timeline-item.active .timeline-icon {
+            border-color: #198754;
+            background: #198754;
+            color: white;
+            box-shadow: 0 0 0 5px rgba(25, 135, 84, 0.2);
+        }
+        
+        /* PROCESSING STATE (Blue Pulse) */
+        .timeline-item.processing .timeline-icon {
+            border-color: #0d6efd;
+            background: #0d6efd;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+        }
+
+        .card-status { border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border-radius: 12px; }
+        .badge-dept { background: #e3f2fd; color: #0d6efd; border: 1px solid #9ec5fe; padding: 5px 12px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}"><i class="fas fa-landmark me-2"></i>CivicFlow</a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm rounded-pill">Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="track-hero">
+        <div class="container">
+            <h2 class="fw-bold mb-3">Live Grievance Tracker</h2>
+            <p class="opacity-75 mb-4">Enter your unique Tracking ID to see real-time updates.</p>
+            
+            <form action="{{ url_for('track_complaint') }}" method="POST" class="search-box">
+                <input type="text" name="tracking" class="form-control search-input" placeholder="e.g. a1b2c3d4" required value="{{ request.form.get('tracking', '') }}">
+                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        {% if complaint %}
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card card-status p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-secondary">#{{ complaint.tracking_id }}</span>
+                        <span class="small text-muted">{{ complaint.created_at }}</span>
+                    </div>
+                    
+                    <h5 class="fw-bold text-dark mb-3">Issue Details</h5>
+                    <p class="text-secondary">{{ complaint.complaint }}</p>
+                    
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="fw-bold text-muted">Department</span>
+                            <span class="badge-dept">{{ complaint.department }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="fw-bold text-muted">Urgency</span>
+                            {% if complaint.urgency == 'Critical' %}
+                                <span class="text-danger fw-bold"><i class="fas fa-bolt me-1"></i> Critical</span>
+                            {% else %}
+                                <span class="text-success fw-bold">Normal</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-grid mt-4">
+                            <a href="{{ url_for('download_receipt', tracking_id=complaint.tracking_id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-download me-2"></i> Download Official Receipt
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card card-status p-4">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2">Status Timeline</h5>
+                    
+                    <div class="timeline">
+                        <div class="timeline-item active">
+                            <div class="timeline-icon"><i class="fas fa-file-alt"></i></div>
+                            <h6 class="fw-bold">Complaint Registered</h6>
+                            <p class="text-muted small mb-0">Your grievance has been securely recorded in the CivicFlow database.</p>
+                            <small class="text-primary">{{ complaint.created_at }}</small>
+                        </div>
+
+                        <div class="timeline-item active">
+                            <div class="timeline-icon"><i class="fas fa-robot"></i></div>
+                            <h6 class="fw-bold">AI Analysis Complete</h6>
+                            <p class="text-muted small mb-0">Classified as <strong>{{ complaint.department }}</strong> with <strong>{{ complaint.urgency }}</strong> priority.</p>
+                        </div>
+
+                        {% if complaint.status != 'Pending' %}
+                        <div class="timeline-item active">
+                            <div class="timeline-icon"><i class="fas fa-user-check"></i></div>
+                            <h6 class="fw-bold">Assigned to Officer</h6>
+                            <p class="text-muted small mb-0">File is currently at desk: <strong>{{ complaint.current_desk or 'Section Clerk' }}</strong></p>
+                        </div>
+                        {% else %}
+                        <div class="timeline-item processing">
+                            <div class="timeline-icon"><i class="fas fa-hourglass-half"></i></div>
+                            <h6 class="fw-bold text-primary">Waiting for Officer Review</h6>
+                            <p class="text-muted small mb-0">Your request is in the queue. SLA Target: {{ complaint.target_date }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if complaint.status == 'Resolved' %}
+                        <div class="timeline-item active">
+                            <div class="timeline-icon"><i class="fas fa-check-circle"></i></div>
+                            <h6 class="fw-bold text-success">Case Resolved</h6>
+                            <p class="text-muted small mb-0">The issue has been marked as resolved by the department.</p>
+                            
+                            <div class="mt-3 bg-light p-3 rounded">
+                                <h6 class="small fw-bold">Rate this Service:</h6>
+                                <form action="{{ url_for('rate_service', id=complaint.id) }}" method="POST" class="d-flex gap-2">
+                                    <select name="rating" class="form-select form-select-sm" style="width: 100px;">
+                                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                                        <option value="4">⭐⭐⭐⭐ Good</option>
+                                        <option value="3">⭐⭐⭐ Average</option>
+                                        <option value="1">⭐ Poor</option>
+                                    </select>
+                                    <input type="text" name="comment" class="form-control form-control-sm" placeholder="Any feedback?">
+                                    <button class="btn btn-sm btn-success">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% elif complaint.status == 'Rejected' %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon bg-danger text-white"><i class="fas fa-times"></i></div>
+                            <h6 class="fw-bold text-danger">Application Rejected</h6>
+                            <p class="text-muted small mb-0">Please contact the department for more details.</p>
+                            <form action="{{ url_for('appeal', id=complaint.id) }}" method="POST" class="mt-2">
+                                <button class="btn btn-sm btn-outline-danger">File Appeal</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                        
+                        {% for h in history %}
+                            {% if h.remarks %}
+                            <div class="mt-2 p-2 border-start border-3 border-warning bg-light">
+                                <small class="text-muted d-block mb-1"><i class="fas fa-history me-1"></i> Update Log:</small>
+                                <span class="fw-bold text-dark">{{ h.remarks }}</span>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% elif request.method == 'POST' %}
+        <div class="text-center mt-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png" width="100" class="mb-3 opacity-50">
+            <h4>No Records Found</h4>
+            <p class="text-muted">We couldn't find a complaint with that ID. Please check and try again.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

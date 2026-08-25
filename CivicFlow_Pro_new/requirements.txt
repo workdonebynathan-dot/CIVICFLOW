@@ -1,0 +1,11 @@
+flask
+flask-limiter
+mysql-connector-python
+python-dotenv
+werkzeug
+deep-translator
+xhtml2pdf
+sentence-transformers
+scikit-learn
+numpy
+pandas
